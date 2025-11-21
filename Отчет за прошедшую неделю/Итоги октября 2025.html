@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Итоги октября 2025 - Интерактивный дашборд</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        /* Stats Overview */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        /* Section Headers */
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        /* Project Cards */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .project-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .project-card.completed {
+            border-left-color: #4caf50;
+        }
+
+        .project-card.high-progress {
+            border-left-color: #4caf50;
+        }
+
+        .project-card.medium-progress {
+            border-left-color: #ff9800;
+        }
+
+        .project-card.low-progress {
+            border-left-color: #f44336;
+        }
+
+        .project-card.problem {
+            border-left-color: #ff5722;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .project-number {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-right: 10px;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 1s ease;
+            animation: progressLoad 1s ease forwards;
+        }
+
+        @keyframes progressLoad {
+            from { width: 0; }
+        }
+
+        .progress-bar.completed { background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%); }
+        .progress-bar.high { background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%); }
+        .progress-bar.medium { background: linear-gradient(90deg, #ff9800 0%, #ffa726 100%); }
+        .progress-bar.low { background: linear-gradient(90deg, #f44336 0%, #ef5350 100%); }
+
+        .progress-text {
+            text-align: right;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .project-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .project-card.expanded .project-details {
+            max-height: 2000px;
+        }
+
+        .project-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .project-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .project-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .project-section li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .project-section li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .project-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.85em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .chart-title {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+
+        /* Employee Cards */
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .employee-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .employee-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .employee-score {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .employee-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        /* OKK Stats */
+        .okk-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .okk-stat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .okk-stat h4 {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .okk-stat .value {
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        /* Financial Tables */
+        .financial-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .financial-table th,
+        .financial-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .financial-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .financial-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-badge.success { background: #d4edda; color: #155724; }
+        .status-badge.warning { background: #fff3cd; color: #856404; }
+        .status-badge.danger { background: #f8d7da; color: #721c24; }
+
+        /* Print Button */
+        .print-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        @media print {
+            .print-button { display: none; }
+            body { background: white; }
+            .section { page-break-inside: avoid; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2em; }
+            .stats-overview { grid-template-columns: 1fr; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .employees-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Subsection headers */
+        .subsection-header {
+            font-size: 1.5em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #764ba2;
+            display: flex;
+            align-items: center;
+        }
+
+        .subsection-header::before {
+            content: "";
+            width: 40px;
+            height: 4px;
+            background: #764ba2;
+            margin-right: 15px;
+            border-radius: 2px;
+        }
+
+        /* Problem indicator */
+        .problem-indicator {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .problem-indicator h5 {
+            color: #ff9800;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .problem-indicator p {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Context info */
+        .context-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .context-info h5 {
+            color: #2196f3;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .context-info p {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Итоги октября 2025</h1>
+            <p>Комплексный отчет по работе департамента операций</p>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview fade-in">
+            <div class="stat-card">
+                <h3>Активных проектов</h3>
+                <div class="number">20</div>
+                <div class="label">проектов и задач</div>
+            </div>
+            <div class="stat-card">
+                <h3>Проверок ОКК</h3>
+                <div class="number">124</div>
+                <div class="label">всего проверок</div>
+            </div>
+            <div class="stat-card">
+                <h3>Средний показатель качества</h3>
+                <div class="number">69.8%</div>
+                <div class="label">оба отдела</div>
+            </div>
+            <div class="stat-card">
+                <h3>Средняя маржинальность</h3>
+                <div class="number">73.42%</div>
+                <div class="label">154 проекта</div>
+            </div>
+            <div class="stat-card">
+                <h3>Завершено проектов</h3>
+                <div class="number">154</div>
+                <div class="label">за октябрь</div>
+            </div>
+            <div class="stat-card">
+                <h3>Экономия студии</h3>
+                <div class="number">6,600₽</div>
+                <div class="label">система Ретейн</div>
+            </div>
+        </div>
+
+        <!-- SECTION 1: PROJECTS -->
+        <div class="section fade-in">
+            <h2 class="section-header">Проекты и задачи</h2>
+
+            <!-- Completed Projects -->
+            <h3 class="subsection-header">Завершенные проекты</h3>
+            <div class="projects-grid">
+                <div class="project-card completed" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#1</span>
+                        <div class="project-title">Оптимизация CRM отдела продаж</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar completed" style="width: 100%"></div>
+                    </div>
+                    <div class="progress-text">100% завершено</div>
+                    <div class="project-details">
+                        <div class="project-section">
+                            <h4>Результат</h4>
+                            <p>Изменения внедрены, обязательные поля заполняются на 100%, жалоб от сотрудников нет. Система работает стабильно.</p>
+                        </div>
+                        <a href="https://fotofactor.platrum.ru/tasks/task/2748" class="project-link" target="_blank">Открыть задачу →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Projects -->
+            <h3 class="subsection-header">Активные проекты</h3>
+            <div class="projects-grid">
+
+                <!-- Project 2 -->
+                <div class="project-card medium-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#2</span>
+                        <div class="project-title">Трансформация системы управления продакшном</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar medium" style="width: 60%"></div>
+                    </div>
+                    <div class="progress-text">60% выполнено</div>
+                    <div class="project-details">
+                        <div class="project-section">
+                            <h4>Достигнуто</h4>
+                            <ul>
+                                <li>Настроены автоматизации для всех направлений производства</li>
+                                <li>Запущена параллельная работа по отдельным направлениям</li>
+                                <li>Ведется подготовка к крупным проектам (МЮНЦ и др.)</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Следующие шаги</h4>
+                            <ul>
+                                <li>Прогнать крупные проекты через новые воронки</li>
+                                <li>Сформировать целостную систему управления</li>
+                                <li>Финализировать автоматизации между процессами</li>
+                            </ul>
+                        </div>
+                        <a href="https://fotofactor.platrum.ru/tasks/task/2746" class="project-link" target="_blank">Открыть задачу →</a>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="project-card high-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#3</span>
+                        <div class="project-title">Цифровизация личных кабинетов сотрудников</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar high" style="width: 90%"></div>
+                    </div>
+                    <div class="progress-text">90% выполнено</div>
+                    <div class="project-details">
+                        <div class="project-section">
+                            <h4>Достигнуто</h4>
+                            <ul>
+                                <li>К концу октября ошибки устранены на 100%</li>
+                                <li>Новых ошибок не обнаружено</li>
+                                <li>Система работает стабильно</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Следующие шаги</h4>
+                            <ul>
+                                <li>Мониторинг работы системы</li>
+                                <li>Сбор обратной связи от пользователей</li>
+                            </ul>
+                        </div>
+                        <a href="https://fotofactor.platrum.ru/tasks/task/2747" class="project-link" target="_blank">Открыть задачу →</a>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-card low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#4</span>
+                        <div class="project-title">Запуск биржи ретуши для направления "Предметка"</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 45%"></div>
+                    </div>
+                    <div class="progress-text">45% выполнено</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Контекст</h5>
+                            <p>Получилась более объемная задача, чем планировалось. На предметке и текстиле не было свежих проектов на момент созвона. На созвоне с Машей Сокуровой собрана информация по донастройке Битрикс. Принято решение создавать автоматизации для всех воронок (не только предметка). Задача поставлена интеграторам.</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Следующие шаги</h4>
+                            <ul>
+                                <li>Настроить все автоматизации</li>
+                                <li>Связать автоматизации с воронкой "Биржа"</li>
+                                <li>Протестировать работу системы</li>
+                            </ul>
+                        </div>
+                        <a href="https://fotofactor1.bitrix24.ru/page/koordinatsiya/zakaz_na_retush/type/1116/kanban/category/171/" class="project-link" target="_blank">Открыть задачу →</a>
+                    </div>
+                </div>
+
+                <!-- Project 5 -->
+                <div class="project-card medium-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#5</span>
+                        <div class="project-title">Система работы с внешними исполнителями</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar medium" style="width: 70%"></div>
+                    </div>
+                    <div class="progress-text">70% выполнено</div>
+                    <div class="project-details">
+                        <div class="problem-indicator">
+                            <h5>Проблема</h5>
+                            <p>Заявка на выплату внешним исполнителям создается по факту работы. Финменеджер не успевает подготовить бюджет. Букеры просят деньги сразу после съемки. Возникает кассовый разрыв, страдает дебиторка и репутация.</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Достигнуто</h4>
+                            <ul>
+                                <li>Все данные по внешним исполнителям внесены в систему</li>
+                                <li>Все контакты занесены в Битрикс, личные кабинеты созданы</li>
+                                <li>Продюсеру Юле показан алгоритм создания запроса на выплату</li>
+                                <li>Настроена связь с ЛК внешних исполнителей</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Следующие шаги</h4>
+                            <ul>
+                                <li>Внедрение на крупном модельном проекте в полевых условиях</li>
+                                <li>Оцифровка алгоритма работы</li>
+                                <li>Загрузка регламента в Platrum</li>
+                            </ul>
+                        </div>
+                        <a href="https://fotofactor1.bitrix24.ru/crm/type/159/kanban/category/157/" class="project-link" target="_blank">Личный кабинет →</a>
+                    </div>
+                </div>
+
+                <!-- Project 6 -->
+                <div class="project-card high-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#6</span>
+                        <div class="project-title">Внедрение QR-кода для управления складом</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar high" style="width: 95%"></div>
+                    </div>
+                    <div class="progress-text">95% выполнено</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Было → Стало</h5>
+                            <p><strong>Было:</strong> Курьер привозит товар с номером заказа. Администратор вручную находит товар по номеру в Битрикс. Затем передвигает на стадию "Товар в студии" и печатает маркировку.</p>
+                            <p><strong>Стало:</strong> QR отправляется клиенту при продаже. Клиент печатает QR и клеит на товар. Администратор сканирует QR, карточка склада автоматически передвигается на стадию "Товар в студии" и печатается маркировка.</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Достигнуто</h4>
+                            <ul>
+                                <li>Функция создана и настроена в Битрикс</li>
+                                <li>Тестирование показало успешный результат</li>
+                                <li>Алгоритм рабочий и стабильный</li>
+                                <li>Созданы инструкции для ОП и администраторов</li>
+                                <li>Администраторам очень удобно использовать</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Осталось (5%)</h4>
+                            <ul>
+                                <li>Продумать стратегию перевода клиентов на QR</li>
+                                <li>Вставить QR в шаблон при отправке номера заказа</li>
+                                <li>Отредактировать обучающие материалы менеджеров</li>
+                                <li>Внедрить процесс в ОП и АХО</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 7 -->
+                <div class="project-card medium-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#7</span>
+                        <div class="project-title">Воронка Pre-Production</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar medium" style="width: 50%"></div>
+                    </div>
+                    <div class="progress-text">50% выполнено</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Контекст</h5>
+                            <p>Часть большого проекта по дроблению производства на смарт-процессы.</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Функции воронки</h4>
+                            <ul>
+                                <li>Доведение моментов согласования ТЗ</li>
+                                <li>Ожидание товара</li>
+                                <li>Решение проблем с реквизитами (если не решены на этапе продажи)</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Текущий статус</h4>
+                            <ul>
+                                <li>Автоматизация настроена</li>
+                                <li>Сделки начинают падать в воронку</li>
+                                <li>Воронка начинает настраиваться</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 8 -->
+                <div class="project-card medium-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#8</span>
+                        <div class="project-title">Донастройка смарт-процесса "Биржа"</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar medium" style="width: 50%"></div>
+                    </div>
+                    <div class="progress-text">50% выполнено</div>
+                    <div class="project-details">
+                        <div class="project-section">
+                            <h4>Текущая работа</h4>
+                            <ul>
+                                <li>Ведется донастройка для правильных автоматизаций</li>
+                                <li>Улучшается прозрачность процессов в воронке</li>
+                                <li>Подготовка к интеграции с другими системами</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 9 -->
+                <div class="project-card high-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#9</span>
+                        <div class="project-title">Смарт-процесс "Расходы": поддержка и оптимизация</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar high" style="width: 85%"></div>
+                    </div>
+                    <div class="progress-text">85% выполнено</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Контекст</h5>
+                            <p>Уже 2 месяца работает смарт-процесс расходы. Продюсеры и координаторы вручную заполняют расходы по сделкам. Время от времени возникают баги.</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Достигнуто</h4>
+                            <ul>
+                                <li>Расходы работают даже при копировании сделки</li>
+                                <li>Актуализирован алгоритм работы воронки расходов</li>
+                                <li>Определен правильный порядок: Согласование → "Утвержден" → система идентифицирует → данные в панель маржинальности/сделку/ЛК</li>
+                            </ul>
+                        </div>
+                        <div class="problem-indicator">
+                            <h5>Важно</h5>
+                            <p>Нельзя сразу двигать из "Согласования" в "Готова к выплате" - расход потеряется</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Текущая работа</h4>
+                            <ul>
+                                <li>Работает система поддержки и калибровки</li>
+                                <li>Самостоятельный мониторинг и сбор информации от коллег</li>
+                                <li>Исправление багов совместно с интеграторами</li>
+                                <li>Контроль чистоты расходов в родном смарте и в ЛК</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 10 -->
+                <div class="project-card high-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#10</span>
+                        <div class="project-title">Система контроля маржинальности проектов</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar high" style="width: 80%"></div>
+                    </div>
+                    <div class="progress-text">80% выполнено</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Было → Стало</h5>
+                            <p><strong>Раньше:</strong> Подсчет маржинальности велся в таблице отчетности производства уже в завершение проекта</p>
+                            <p><strong>Сейчас:</strong> Есть инструмент в Битрикс, который берет данные из расходов и формирует панель финансов и маржинальности</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Текущая работа</h4>
+                            <ul>
+                                <li>Донастройка системы</li>
+                                <li>Мониторинг и исправление ошибок</li>
+                                <li>Контроль ситуаций с отрицательной маржинальностью</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Статус</h4>
+                            <p>Проект идет гладко, система развивается. Скоро будет выведен оптимальный удобный инструмент для отображения.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 11 -->
+                <div class="project-card medium-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#11</span>
+                        <div class="project-title">Система контроля выплат по модели "Ретейн"</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar medium" style="width: 70%"></div>
+                    </div>
+                    <div class="progress-text">70% выполнено</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Контекст</h5>
+                            <p>Сотрудник (ретушер) запросил оклад - предложили систему Ретейн.</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Достигнуто</h4>
+                            <ul>
+                                <li>Установлены жесткие рамки и жесткая система</li>
+                                <li>Устранение остатков хаоса после перехода на новую модель</li>
+                                <li>Разбор нюансов в подсчетах</li>
+                                <li>Частично описан регламент выплат с информацией о сроках, воронках</li>
+                                <li>Определено, что должно быть учтено, на каких стадиях должны быть карточки</li>
+                                <li>Настроена связь с основным канбаном и принятием работы от клиента</li>
+                                <li>Наташа подбивает карточки в воронке</li>
+                                <li><strong>Экономия студии: 6,600₽</strong> (перерасчет выплат ретушера)</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Ожидаемый результат</h4>
+                            <ul>
+                                <li>Успешный кейс внедрения</li>
+                                <li>Строгий регламент работы</li>
+                                <li>Меньше ошибок - выше скорость обработки</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Problems and Tasks -->
+            <h3 class="subsection-header">Проблемы и задачи</h3>
+            <div class="projects-grid">
+
+                <!-- Task 12 -->
+                <div class="project-card problem low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#12</span>
+                        <div class="project-title">Вопрос с переводами дизайнеру Арсению</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 30%"></div>
+                    </div>
+                    <div class="progress-text">30% - требует решения</div>
+                    <div class="project-details">
+                        <div class="problem-indicator">
+                            <h5>Проблема</h5>
+                            <p>Арсений - внутренний дизайнер, гражданин Казахстана, без СЗ и карты. Раньше переводили на ИП Ане Б (руководителю производства), сейчас с этим затык, сотрудник ждет решения.</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Текущая ситуация</h4>
+                            <ul>
+                                <li>С Аней сейчас не получается связаться</li>
+                                <li>Другие варианты пока не найдены</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Рассматриваемые варианты</h4>
+                            <ul>
+                                <li>Вариант 1: Кто-то из команды открывает карту и отправляет Арсению</li>
+                                <li>Вариант 2: Виртуальная карта с криптой, привязанной к USD</li>
+                                <li>Вариант 3: Нано банана - аналог цифрового банкинга</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 13 -->
+                <div class="project-card problem low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#13</span>
+                        <div class="project-title">Проблема копирования сделок</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 40%"></div>
+                    </div>
+                    <div class="progress-text">40% выполнено</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Контекст</h5>
+                            <p>Копирование из продаж в воронку продакшн. Повторники: копирование в воронке продакшн.</p>
+                        </div>
+                        <div class="problem-indicator">
+                            <h5>Проблемы</h5>
+                            <p>Разные нюансы, детали, сброс автоматизаций. При копировании параметры тоже копируются (даты полугодовой давности).</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Задачи</h4>
+                            <ul>
+                                <li>Выявить тонкости копирования сделок</li>
+                                <li>Определить: какие поля тянутся автоматом, какие вручную, какие от условий</li>
+                                <li>Донастроить механизм</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 14 -->
+                <div class="project-card problem low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#14</span>
+                        <div class="project-title">Ссылка на рендер для текстиля</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 10%"></div>
+                    </div>
+                    <div class="progress-text">10% выполнено</div>
+                    <div class="project-details">
+                        <div class="project-section">
+                            <h4>Задача</h4>
+                            <p>Сделать так, чтобы ссылка на рендер подтягивалась с предыдущей сделки</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Детали</h4>
+                            <ul>
+                                <li>Информация должна храниться где-то (скорее всего в клиенте)</li>
+                                <li>Механизм отслеживания? Что если изменилась ссылка на рендер?</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Статус</h4>
+                            <p>Нужно разобраться, насколько это актуально и приоритетно для текстиля</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 15 -->
+                <div class="project-card problem medium-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#15</span>
+                        <div class="project-title">Документооборот: закрывающие документы</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar medium" style="width: 60%"></div>
+                    </div>
+                    <div class="progress-text">60% выполнено</div>
+                    <div class="project-details">
+                        <div class="problem-indicator">
+                            <h5>Проблема</h5>
+                            <p>Клиенты не получают быстро закрывающие документы, задержка доплаты</p>
+                        </div>
+                        <div class="context-info">
+                            <h5>Было</h5>
+                            <ul>
+                                <li>Автоматизация со стадии "Клиент проверяет" → воронка финменеджера</li>
+                                <li>Ответственный не проверял товары в ЭДО</li>
+                                <li>Высылались документы с ошибками (правки в товарах)</li>
+                                <li>Убрали автоматизацию, процесс стал вручную</li>
+                                <li>Клиенты недовольны задержками</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Решение</h4>
+                            <ul>
+                                <li>Вернуть процесс, но пересмотреть</li>
+                                <li>Ключевой момент: ПЕРЕД автоматизацией ответственный проверяет товары, актуализирует</li>
+                                <li>Аня Астапенкова составила ТЗ по автоматизациям</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Задача</h4>
+                            <p>Связаться с интеграторами, передать задачу в разработку</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 16 -->
+                <div class="project-card problem low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#16</span>
+                        <div class="project-title">Проблема с почтой Bitrix</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 20%"></div>
+                    </div>
+                    <div class="progress-text">В ожидании от интеграторов</div>
+                    <div class="project-details">
+                        <div class="problem-indicator">
+                            <h5>Проблемы</h5>
+                            <ul>
+                                <li>Большая задержка входящих сообщений от клиентов (сутки-двое)</li>
+                                <li>Клиенты негодуют, теряем лояльность</li>
+                                <li>Отправленные сообщения появляются в папке "Отправленные" через сутки-двое</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Статус</h4>
+                            <p>Задача поставлена интеграторам, ждем решения</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 17 -->
+                <div class="project-card problem low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#17</span>
+                        <div class="project-title">Инструкция по Smart Process "Расходы"</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 30%"></div>
+                    </div>
+                    <div class="progress-text">Ждем от интеграторов</div>
+                    <div class="project-details">
+                        <div class="project-section">
+                            <h4>Причина</h4>
+                            <p>Постоянно вылезают нюансы, детали забываются из-за количества задач</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Статус</h4>
+                            <p>Ожидание детальной инструкции от интеграторов</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 18 -->
+                <div class="project-card problem low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#18</span>
+                        <div class="project-title">Встреча с интеграторами Bitrix</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 20%"></div>
+                    </div>
+                    <div class="progress-text">Организационная задача</div>
+                    <div class="project-details">
+                        <div class="context-info">
+                            <h5>Контекст</h5>
+                            <p>Руководитель ОП покидает рабочее место, задача падает на координатора</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Цель встречи</h4>
+                            <ul>
+                                <li>Синергия усилий</li>
+                                <li>Понять план автоматизации портала</li>
+                                <li>Связь между: воронками, биржей, смарт-процессами, "Заказ на съемку", "Заказ на ретушь", спринтами, расходами</li>
+                                <li>Общий план, алгоритм</li>
+                                <li>Что делаем в ноябре пошагово</li>
+                                <li>Как связываем все между собой</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Статус</h4>
+                            <p>Требует отдельного детального подхода, отдельного созвона</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 19 -->
+                <div class="project-card problem medium-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#19</span>
+                        <div class="project-title">Обновление данных по оборудованию</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar medium" style="width: 50%"></div>
+                    </div>
+                    <div class="progress-text">В работе</div>
+                    <div class="project-details">
+                        <div class="problem-indicator">
+                            <h5>Проблема</h5>
+                            <p>Информация по WiFi, паролям частично отсутствует</p>
+                        </div>
+                        <div class="project-section">
+                            <h4>Текущая работа</h4>
+                            <ul>
+                                <li>Администратор Константин Лионов занимается вопросом в студии</li>
+                                <li>Настройка камер</li>
+                                <li>Есть таблица, собираются данные</li>
+                                <li>Планируется скрестить и зафиксировать в таблице</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 20 -->
+                <div class="project-card problem low-progress" onclick="toggleProject(this)">
+                    <div class="project-header">
+                        <span class="project-number">#20</span>
+                        <div class="project-title">Созвон с Ириной Романовой</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar low" style="width: 30%"></div>
+                    </div>
+                    <div class="progress-text">Требует внимания</div>
+                    <div class="project-details">
+                        <div class="project-section">
+                            <h4>Цель</h4>
+                            <p>Еще раз проговорить алгоритм работы</p>
+                        </div>
+                        <div class="problem-indicator">
+                            <h5>Проблемы</h5>
+                            <p>После последнего созвона ошибки те же:</p>
+                            <ul>
+                                <li>Забывает прикреплять ТЗ</li>
+                                <li>Если клиент пост-оплатник, не указывается</li>
+                                <li>Если есть предоплата, не указывается</li>
+                                <li>Систематические ошибки продолжаются</li>
+                            </ul>
+                        </div>
+                        <div class="project-section">
+                            <h4>Задача</h4>
+                            <p>Позвонить, выяснить, где непонятно, где путается</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Regular Tasks -->
+            <h3 class="subsection-header">Регулярные задачи</h3>
+            <div class="projects-grid">
+
+                <div class="project-card medium-progress">
+                    <div class="project-header">
+                        <div class="project-title">Контроль процессов в Bitrix</div>
+                    </div>
+                    <ul style="margin-top: 15px;">
+                        <li>Контроль сроков</li>
+                        <li>Контроль доплат</li>
+                        <li>Проверка заполнения полей координаторами</li>
+                        <li>Движение статусов по оплатам, ускорению процессов</li>
+                        <li>Утренний обход проектов в различных стадиях</li>
+                        <li>Контроль, чтобы процессы не зависали</li>
+                        <li>Контроль по воронкам ретуши</li>
+                        <li>Сопровождение воронки МЮНЦ</li>
+                    </ul>
+                </div>
+
+                <div class="project-card medium-progress">
+                    <div class="project-header">
+                        <div class="project-title">Работа с ретушерами и фотографами</div>
+                    </div>
+                    <ul style="margin-top: 15px;">
+                        <li>Систематический разбор вопросов по выплатам</li>
+                        <li>Вопросы: когда, как будет выплата</li>
+                        <li>Консультации по самозанятости</li>
+                    </ul>
+                </div>
+
+                <div class="project-card medium-progress">
+                    <div class="project-header">
+                        <div class="project-title">Сбор личных данных</div>
+                    </div>
+                    <ul style="margin-top: 15px;">
+                        <li>Заполнение личных кабинетов реквизитами</li>
+                        <li>Переход на Bitrix как централизованную систему по финансам и процессам</li>
+                    </ul>
+                </div>
+
+                <div class="project-card medium-progress">
+                    <div class="project-header">
+                        <div class="project-title">Обновление данных по оборудованию</div>
+                    </div>
+                    <ul style="margin-top: 15px;">
+                        <li>Информация по WiFi, паролям</li>
+                        <li>Настройка камер</li>
+                        <li>Ведение таблицы оборудования</li>
+                    </ul>
+                </div>
+
+                <div class="project-card medium-progress">
+                    <div class="project-header">
+                        <div class="project-title">Созвоны с координаторами</div>
+                    </div>
+                    <ul style="margin-top: 15px;">
+                        <li>Проговаривание алгоритмов работы</li>
+                        <li>Выявление проблемных мест</li>
+                        <li>Обучение и поддержка</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SECTION 2: OKK SALES -->
+        <div class="section fade-in">
+            <h2 class="section-header">Отдел контроля качества: Продажи</h2>
+
+            <div class="okk-stats">
+                <div class="okk-stat">
+                    <h4>Всего проверок</h4>
+                    <div class="value">65</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Средний показатель</h4>
+                    <div class="value">51.63%</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Сотрудников</h4>
+                    <div class="value">4</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Рейтинг сотрудников отдела продаж</div>
+                    <canvas id="salesEmployeesChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Показатели по категориям</div>
+                    <canvas id="salesCategoriesChart"></canvas>
+                </div>
+
+                <div class="chart-container" style="grid-column: 1 / -1;">
+                    <div class="chart-title">Динамика показателей отдела продаж (февраль-октябрь)</div>
+                    <canvas id="salesDynamicsChart"></canvas>
+                </div>
+            </div>
+
+            <h3 class="subsection-header">Сотрудники отдела продаж</h3>
+            <div class="employees-grid">
+                <div class="employee-card">
+                    <div class="employee-name">Александра Перетятько</div>
+                    <div class="employee-score">61.67%</div>
+                    <span class="status-badge success">Лучший в отделе</span>
+                </div>
+                <div class="employee-card">
+                    <div class="employee-name">Карина Зиннатуллина</div>
+                    <div class="employee-score">51.73%</div>
+                    <span class="status-badge warning">Близко к среднему</span>
+                </div>
+                <div class="employee-card">
+                    <div class="employee-name">Нигина Мадрахимова</div>
+                    <div class="employee-score">48.66%</div>
+                    <span class="status-badge warning">Ниже среднего</span>
+                </div>
+                <div class="employee-card">
+                    <div class="employee-name">Ольга Альбрихт</div>
+                    <div class="employee-score">47.86%</div>
+                    <span class="status-badge warning">Ниже среднего</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: OKK PRODUCTION -->
+        <div class="section fade-in">
+            <h2 class="section-header">Отдел контроля качества: Продакшн</h2>
+
+            <div class="okk-stats">
+                <div class="okk-stat">
+                    <h4>Всего проверок</h4>
+                    <div class="value">59</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Средний показатель</h4>
+                    <div class="value">88%</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>На премию</h4>
+                    <div class="value">3</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Всего ошибок</h4>
+                    <div class="value">32</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Рейтинг сотрудников отдела продакшн</div>
+                    <canvas id="productionEmployeesChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Показатели по категориям</div>
+                    <canvas id="productionCategoriesChart"></canvas>
+                </div>
+
+                <div class="chart-container" style="grid-column: 1 / -1;">
+                    <div class="chart-title">Динамика показателей отдела продакшн (январь-октябрь)</div>
+                    <canvas id="productionDynamicsChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Сравнение отделов</div>
+                    <canvas id="departmentsComparisonChart"></canvas>
+                </div>
+            </div>
+
+            <h3 class="subsection-header">Сотрудники отдела продакшн</h3>
+            <div class="employees-grid">
+                <div class="employee-card">
+                    <div class="employee-name">Рената Галиулина</div>
+                    <div class="employee-score">93%</div>
+                    <span class="employee-badge">Премия 10,000₽</span>
+                </div>
+                <div class="employee-card">
+                    <div class="employee-name">Анна Астапенкова</div>
+                    <div class="employee-score">91%</div>
+                    <span class="employee-badge">Премия 10,000₽</span>
+                </div>
+                <div class="employee-card">
+                    <div class="employee-name">Юлия Янько</div>
+                    <div class="employee-score">90%</div>
+                    <span class="status-badge warning">Только 1 проект</span>
+                </div>
+                <div class="employee-card">
+                    <div class="employee-name">Ирина Романова</div>
+                    <div class="employee-score">82%</div>
+                    <span class="status-badge success">Хороший результат</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: FINANCIALS -->
+        <div class="section fade-in">
+            <h2 class="section-header">Производство и финансы</h2>
+
+            <h3 class="subsection-header">Маржинальность проектов</h3>
+            <div class="okk-stats">
+                <div class="okk-stat">
+                    <h4>Средняя маржинальность</h4>
+                    <div class="value">73.42%</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Проектов обработано</h4>
+                    <div class="value">154</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Модельная съемка</h4>
+                    <div class="value">73.14%</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Остальные направления</h4>
+                    <div class="value">73.43%</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Маржинальность по типам съемки</div>
+                    <canvas id="marginByTypeChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Сроки выполнения проектов</div>
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 30px; color: #667eea;">ТОП-10 проектов с ВЫСОКОЙ маржинальностью (97%)</h4>
+            <table class="financial-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Проект</th>
+                        <th>Тип</th>
+                        <th>Маржа</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Владимир Захаров - тестовая съемка 10 ковров</td>
+                        <td>Текстиль</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Ксения Кленина (Рокикс) - инфографика</td>
+                        <td>Дизайн</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>ООО "ПОСУДА МАРКЕТ" - инфографика</td>
+                        <td>Дизайн</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Мария Mia-Amore - ИИ генерация</td>
+                        <td>Дизайн</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Алексей (ИП ЧУРИЛИНА) - перекрас</td>
+                        <td>Текстиль</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Исмоилзода Лутфулло - инфографика</td>
+                        <td>Текстиль</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Эльвира (Вегас групп) - 3Д моделирование матраса</td>
+                        <td>Текстиль</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Israfil Cavansirli - инфографика 9 арт штор</td>
+                        <td>Текстиль</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Ари ООО "ОЛЛ" - оплата аренды</td>
+                        <td>Предметка</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Israfil Cavansirli - правки в инфографику</td>
+                        <td>Дизайн</td>
+                        <td><span class="status-badge success">97%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4 style="margin-top: 30px; color: #f44336;">ТОП-10 проектов с НИЗКОЙ маржинальностью</h4>
+            <table class="financial-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Проект</th>
+                        <th>Тип</th>
+                        <th>Маржа</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>MINIMERINI Юлия - кадрирование</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge danger">18%</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Май Май (Зухра) - 2 арт СРОЧНАЯ СЪЕМКА</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge danger">23.52%</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>П Георгий ООО Платан - Перекрас</td>
+                        <td>Обувь</td>
+                        <td><span class="status-badge danger">34.5%</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Irina Zhuravlyova - ПЕРЕСЪЕМ</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge danger">42.59%</span></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Larosh (Ольга/Михаил)</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge warning">49.12%</span></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>ASMI (Лаура) - почасовая 1 час</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge warning">50.14%</span></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>0not1 (ИП Арутюнова) - 2 арт</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge warning">54.23%</span></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>ХЧ Мерч (Родион) - 22 арт вешалка</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge warning">54.37%</span></td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Russian drift series (Елена) - 2 арт манекен</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge warning">54.49%</span></td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>(ВП) ООО "ПРИЗМА" - 7 арт</td>
+                        <td>Манекен</td>
+                        <td><span class="status-badge warning">54.53%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-header">Расходы на производство</h3>
+            <div class="okk-stats">
+                <div class="okk-stat">
+                    <h4>Общие расходы</h4>
+                    <div class="value">1.21M₽</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Внутренние исполнители</h4>
+                    <div class="value">1.09M₽</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Внешние исполнители</h4>
+                    <div class="value">118K₽</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Координаторы</h4>
+                    <div class="value">218K₽</div>
+                </div>
+                <div class="okk-stat">
+                    <h4>Доля внешних</h4>
+                    <div class="value">9.7%</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Структура расходов</div>
+                    <canvas id="expensesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <button class="print-button" onclick="window.print()">Печать отчета</button>
+    </div>
+
+    <script>
+        // Toggle project details
+        function toggleProject(element) {
+            element.classList.toggle('expanded');
+        }
+
+        // Chart.js configurations
+        const chartColors = {
+            primary: '#667eea',
+            secondary: '#764ba2',
+            success: '#4caf50',
+            warning: '#ff9800',
+            danger: '#f44336',
+            info: '#2196f3'
+        };
+
+        // Sales Employees Chart
+        const salesEmployeesCtx = document.getElementById('salesEmployeesChart').getContext('2d');
+        new Chart(salesEmployeesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Александра\nПеретятько', 'Карина\nЗиннатуллина', 'Нигина\nМадрахимова', 'Ольга\nАльбрихт'],
+                datasets: [{
+                    label: 'Показатель (%)',
+                    data: [61.67, 51.73, 48.66, 47.86],
+                    backgroundColor: [
+                        chartColors.success,
+                        chartColors.warning,
+                        chartColors.warning,
+                        chartColors.warning
+                    ]
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Sales Categories Chart
+        const salesCategoriesCtx = document.getElementById('salesCategoriesChart').getContext('2d');
+        new Chart(salesCategoriesCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Работа с КЭВ', '3КП в срок', 'Общение с клиентом', 'Заполнение CRM'],
+                datasets: [{
+                    label: 'Отдел продаж (%)',
+                    data: [26.28, 14.81, 94.18, 71.30],
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                    borderColor: chartColors.primary,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Sales Dynamics Chart
+        const salesDynamicsCtx = document.getElementById('salesDynamicsChart').getContext('2d');
+        new Chart(salesDynamicsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь'],
+                datasets: [{
+                    label: 'Отдел продаж (%)',
+                    data: [43.58, 37.93, 36.49, 42.21, 47.77, 56.54, 50.84, 50.41, 51.63],
+                    borderColor: chartColors.primary,
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Production Employees Chart
+        const productionEmployeesCtx = document.getElementById('productionEmployeesChart').getContext('2d');
+        new Chart(productionEmployeesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Рената\nГалиулина', 'Анна\nАстапенкова', 'Юлия\nЯнько', 'Ирина\nРоманова'],
+                datasets: [{
+                    label: 'Показатель (%)',
+                    data: [93, 91, 90, 82],
+                    backgroundColor: [
+                        chartColors.success,
+                        chartColors.success,
+                        chartColors.warning,
+                        chartColors.info
+                    ]
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Production Categories Chart
+        const productionCategoriesCtx = document.getElementById('productionCategoriesChart').getContext('2d');
+        new Chart(productionCategoriesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Обязательные\nполя', 'ТЗ\nприкреплено', 'Предоплата', 'Мертвые\nлинии', 'Ответ\n45 мин', 'Правки\nплатно', 'Работа\nс ТЗ', 'Линии\nбез ответа'],
+                datasets: [{
+                    label: 'Показатель (%)',
+                    data: [77, 46, 77, 69, 54, 77, 85, 77],
+                    backgroundColor: chartColors.primary
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Production Dynamics Chart
+        const productionDynamicsCtx = document.getElementById('productionDynamicsChart').getContext('2d');
+        new Chart(productionDynamicsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь'],
+                datasets: [{
+                    label: 'Отдел продакшн (%)',
+                    data: [80.77, 79.50, 72, 71.75, 82.80, 87.25, 88.80, 89, 90, 88],
+                    borderColor: chartColors.success,
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Departments Comparison Chart
+        const departmentsComparisonCtx = document.getElementById('departmentsComparisonChart').getContext('2d');
+        new Chart(departmentsComparisonCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Продакшн (88%)', 'Продажи (51.63%)'],
+                datasets: [{
+                    data: [88, 51.63],
+                    backgroundColor: [chartColors.success, chartColors.warning]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Margin by Type Chart
+        const marginByTypeCtx = document.getElementById('marginByTypeChart').getContext('2d');
+        new Chart(marginByTypeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Дизайн/\nИнфографика', 'Текстиль\n3D', 'Модельная\nсъемка', 'Одежда\nманекен', 'Обувь\nпредметная', 'Срочные/\nПересъемы'],
+                datasets: [{
+                    label: 'Маржинальность (%)',
+                    data: [97, 85, 73.14, 70, 60, 35],
+                    backgroundColor: [
+                        chartColors.success,
+                        chartColors.success,
+                        chartColors.info,
+                        chartColors.warning,
+                        chartColors.warning,
+                        chartColors.danger
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Timeline Chart
+        const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+        new Chart(timelineCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Съемка', 'Ретушь'],
+                datasets: [{
+                    label: 'Среднее время (часы)',
+                    data: [6.5, 18.9],
+                    backgroundColor: [chartColors.success, chartColors.warning]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Expenses Chart
+        const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+        new Chart(expensesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Внутренние исполнители (90.3%)', 'Внешние исполнители (9.7%)'],
+                datasets: [{
+                    data: [1094380.73, 118070],
+                    backgroundColor: [chartColors.primary, chartColors.warning]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
