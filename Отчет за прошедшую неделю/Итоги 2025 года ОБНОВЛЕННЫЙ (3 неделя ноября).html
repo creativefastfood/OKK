@@ -1601,6 +1601,13 @@
                     </ul>
                 </div>
 
+                <div class="charts-grid">
+                    <div class="chart-container" style="grid-column: 1 / -1;">
+                        <div class="chart-title">Динамика показателей отдела продаж (февраль-ноябрь)</div>
+                        <canvas id="novSalesDynamicsChart"></canvas>
+                    </div>
+                </div>
+
                 <h3 class="subsection-header">Сотрудники отдела продаж (3 недели)</h3>
                 <div class="employees-grid">
                     <div class="employee-card">
@@ -2088,6 +2095,30 @@
                             data: [80.77, 79.50, 72, 71.75, 82.80, 87.25, 88.80, 89, 90, 88, 86.58],
                             borderColor: chartColors.success,
                             backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { display: true } },
+                        scales: { y: { beginAtZero: true, max: 100 } }
+                    }
+                });
+            }
+
+            const novSalesDynamicsCtx = document.getElementById('novSalesDynamicsChart');
+            if (novSalesDynamicsCtx && !novSalesDynamicsCtx.chartInstance) {
+                novSalesDynamicsCtx.chartInstance = new Chart(novSalesDynamicsCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь'],
+                        datasets: [{
+                            label: 'Отдел продаж (%)',
+                            data: [43.58, 37.93, 36.49, 42.21, 47.77, 56.54, 50.84, 50.41, 51.63, 51.49],
+                            borderColor: chartColors.primary,
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
                             fill: true,
                             tension: 0.4
                         }]
